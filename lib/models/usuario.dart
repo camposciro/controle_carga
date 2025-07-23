@@ -1,3 +1,5 @@
+// lib/models/usuario.dart
+
 enum PerfilUsuario {
   motorista,
   administrador,

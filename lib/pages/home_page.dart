@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/usuario.dart';
 import '../services/auth_service.dart';
+import 'form_usuario_page.dart';
+import 'cadastro_carga_page.dart'; // ✅ Import da nova página de cadastro
 
 class HomePage extends StatefulWidget {
   final AuthService authService;
@@ -29,8 +31,49 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
+  Future<void> _escolherPerfilECadastrar() async {
+    final perfilEscolhido = await showDialog<PerfilUsuario>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Selecionar Tipo de Usuário'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.local_shipping),
+              title: const Text('Motorista'),
+              onTap: () => Navigator.pop(context, PerfilUsuario.motorista),
+            ),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: const Text('Administrador'),
+              onTap: () => Navigator.pop(context, PerfilUsuario.administrador),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (perfilEscolhido != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => FormUsuarioPage(
+            authService: widget.authService,
+            perfilInicial: perfilEscolhido,
+          ),
+        ),
+      );
+    }
+  }
+
   List<_BotaoHome> _botoesCarga() => [
-    _BotaoHome(Icons.add_box, 'Cadastrar', () => _abrirPagina(context, 'Cadastrar Carga')),
+    _BotaoHome(Icons.add_box, 'Cadastrar', () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CadastroCargaPage()), // ✅ Agora abre a tela real
+      );
+    }),
     _BotaoHome(Icons.list, 'Listar', () => _abrirPagina(context, 'Listar Cargas')),
     _BotaoHome(Icons.edit, 'Editar', () => _abrirPagina(context, 'Editar Carga')),
     _BotaoHome(Icons.search, 'Buscar', () => _abrirPagina(context, 'Buscar Carga')),
@@ -46,7 +89,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   List<_BotaoHome> _botoesUsuario() => [
     _BotaoHome(Icons.group, 'Usuários', () => _abrirPagina(context, 'Listar Usuários')),
-    _BotaoHome(Icons.person_add_alt, 'Cadastrar', () => _abrirPagina(context, 'Cadastrar Usuário')),
+    _BotaoHome(Icons.person_add_alt, 'Cadastrar', _escolherPerfilECadastrar),
     _BotaoHome(Icons.edit_attributes, 'Editar', () => _abrirPagina(context, 'Editar Usuário')),
   ];
 
@@ -118,33 +161,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             return isAdmin
                 ? Column(
               children: [
-                Align(
+                Container(
                   alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 8),
                   child: TabBar(
                     controller: _tabController,
                     isScrollable: true,
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                    indicatorColor: Colors.blue,
+                    tabs: const [
+                      Tab(text: 'Cargas'),
+                      Tab(text: 'Motoristas'),
+                      Tab(text: 'Usuários'),
+                      Tab(text: 'Relatórios'),
+                    ],
                     labelColor: Colors.blue,
                     unselectedLabelColor: Colors.grey,
-                    tabs: const [
-                      Tab(
-                        icon: Icon(Icons.inventory),
-                        child: Text('Cargas', style: TextStyle(fontSize: 12)),
-                      ),
-                      Tab(
-                        icon: Icon(Icons.local_shipping),
-                        child: Text('Motoristas', style: TextStyle(fontSize: 12)),
-                      ),
-                      Tab(
-                        icon: Icon(Icons.group),
-                        child: Text('Usuários', style: TextStyle(fontSize: 12)),
-                      ),
-                      Tab(
-                        icon: Icon(Icons.bar_chart),
-                        child: Text('Relatórios', style: TextStyle(fontSize: 12)),
-                      ),
-                    ],
                   ),
                 ),
                 Expanded(
