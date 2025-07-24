@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'form_usuario_page.dart';
+import 'cadastro_carga_page.dart';
+import 'listar_cargas_page.dart';
 import '../models/usuario.dart';
 import '../services/auth_service.dart';
-import 'form_usuario_page.dart';
-import 'cadastro_carga_page.dart'; // ✅ Import da nova página de cadastro
 
 class HomePage extends StatefulWidget {
   final AuthService authService;
@@ -71,13 +72,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _BotaoHome(Icons.add_box, 'Cadastrar', () {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const CadastroCargaPage()), // ✅ Agora abre a tela real
+        MaterialPageRoute(builder: (_) => const CadastroCargaPage()),
       );
     }),
-    _BotaoHome(Icons.list, 'Listar', () => _abrirPagina(context, 'Listar Cargas')),
-    _BotaoHome(Icons.edit, 'Editar', () => _abrirPagina(context, 'Editar Carga')),
-    _BotaoHome(Icons.search, 'Buscar', () => _abrirPagina(context, 'Buscar Carga')),
-    _BotaoHome(Icons.sync, 'Status', () => _abrirPagina(context, 'Controle de Status')),
+    _BotaoHome(Icons.list, 'Listar', () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ListarCargasPage(authService: widget.authService),
+        ),
+      );
+    }),
   ];
 
   List<_BotaoHome> _botoesMotorista() => [
@@ -118,16 +123,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     final colunas = _calcularColunas(largura);
     return GridView.count(
       crossAxisCount: colunas,
-      padding: const EdgeInsets.all(12),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
       childAspectRatio: 1,
       physics: const BouncingScrollPhysics(),
-      children: botoes.map((b) {
-        return OutlinedButton(
+      children: botoes
+          .map(
+            (b) => OutlinedButton(
           onPressed: b.onPressed,
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.all(8),
+            backgroundColor: Colors.white,
             side: BorderSide(color: Colors.blue.shade300),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
@@ -139,14 +146,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               Text(
                 b.label,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
+                style: const TextStyle(fontSize: 13, color: Colors.black87),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
-        );
-      }).toList(),
+        ),
+      )
+          .toList(),
     );
   }
 
@@ -163,7 +171,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               children: [
                 Container(
                   alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.only(left: 4),
                   child: TabBar(
                     controller: _tabController,
                     isScrollable: true,
@@ -175,6 +183,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     ],
                     labelColor: Colors.blue,
                     unselectedLabelColor: Colors.grey,
+                    labelStyle: const TextStyle(fontSize: 14),
+                    unselectedLabelStyle: const TextStyle(fontSize: 14),
+                    indicatorColor: Colors.blue,
+                    indicatorWeight: 3,
                   ),
                 ),
                 Expanded(
